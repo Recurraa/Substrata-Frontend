@@ -13,6 +13,8 @@ export const env = {
   app: {
     url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
     name: process.env.NEXT_PUBLIC_APP_NAME ?? "Substrata",
+    apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1",
+    useMock: process.env.NEXT_PUBLIC_USE_MOCK === "true",
   },
   webhookSecret: process.env.NEXT_PUBLIC_WEBHOOK_SECRET ?? "",
 } as const;
