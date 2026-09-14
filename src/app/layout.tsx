@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Syne, Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { SkipLink } from "@/components/skip-link";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${syne.variable} ${manrope.variable} font-body`}>
+        <SkipLink />
         <Providers>{children}</Providers>
       </body>
     </html>
