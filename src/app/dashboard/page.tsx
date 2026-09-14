@@ -4,30 +4,38 @@ import { DollarSign, Users, TrendingUp, Activity } from "lucide-react";
 import { StatsCard } from "@/components/stats-card";
 import { RevenueChart } from "@/components/revenue-chart";
 import { BillingTable } from "@/components/billing-table";
-import { LoadingSpinner, ErrorState } from "@/components/states";
+import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMerchantStats, useRevenueData, useTransactions } from "@/hooks/use-substrata";
 import { formatAmount } from "@/lib/utils";
 
-const MERCHANT_ID = "merchant_1"; // Replace with wallet address in production
+const MERCHANT_ID = "merchant_1";
 
 export default function DashboardPage() {
-  const { data: stats, isLoading: statsLoading, error: statsError } = useMerchantStats(MERCHANT_ID);
-  const { data: revenue, isLoading: revenueLoading } = useRevenueData(MERCHANT_ID);
-  const { data: transactions, isLoading: txLoading } = useTransactions();
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+    refetch: refetchStats,
+  } = useMerchantStats(MERCHANT_ID);
+  const { data: revenue, isLoading: revenueLoading, error: revenueError } = useRevenueData(MERCHANT_ID);
+  const { data: transactions, isLoading: txLoading, error: txError } = useTransactions();
 
-  if (statsLoading) return <LoadingSpinner />;
-  if (statsError) return <ErrorState message="Failed to load dashboard data." />;
+  if (statsLoading) return <LoadingSpinner text="Loading dashboard…" />;
+  if (statsError) {
+    return <ErrorState message="Failed to load dashboard data." onRetry={() => refetchStats()} />;
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Your subscription business at a glance</p>
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+          Your subscription business at a glance
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <StatsCard
           title="Total Revenue"
           value={stats ? formatAmount(stats.totalRevenue, "USDC") : "—"}
@@ -54,30 +62,40 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Revenue Chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Revenue (12 months)</CardTitle>
+          <CardTitle className="font-display">Revenue (12 months)</CardTitle>
         </CardHeader>
         <CardContent>
           {revenueLoading ? (
             <LoadingSpinner text="Loading chart…" />
+          ) : revenueError ? (
+            <ErrorState message="Failed to load revenue chart." />
+          ) : !revenue?.length ? (
+            <EmptyState title="No revenue yet" description="Create a plan and get your first subscriber." />
           ) : (
-            <RevenueChart data={revenue ?? []} />
+            <div className="w-full overflow-x-auto">
+              <RevenueChart data={revenue} />
+            </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Recent Transactions */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle className="font-display">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           {txLoading ? (
             <LoadingSpinner text="Loading transactions…" />
+          ) : txError ? (
+            <ErrorState message="Failed to load transactions." />
+          ) : !transactions?.length ? (
+            <EmptyState title="No transactions" description="Payments will appear here once billing runs." />
           ) : (
-            <BillingTable transactions={transactions ?? []} />
+            <div className="overflow-x-auto">
+              <BillingTable transactions={transactions} />
+            </div>
           )}
         </CardContent>
       </Card>
