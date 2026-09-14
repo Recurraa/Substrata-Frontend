@@ -6,6 +6,8 @@ import {
   Contract,
   TransactionBuilder,
   Account,
+  Address,
+  nativeToScVal,
   BASE_FEE,
   SorobanRpc,
   type xdr,
@@ -13,6 +15,21 @@ import {
 import { signTransaction } from "@stellar/freighter-api";
 import { env } from "@/lib/env";
 import { NETWORK_PASSPHRASE, sorobanServer } from "@/lib/stellar";
+import type { CreatePlanInput } from "@/types";
+
+const INTERVAL_SECONDS: Record<CreatePlanInput["interval"], number> = {
+  daily: 86_400,
+  weekly: 604_800,
+  monthly: 2_592_000,
+  yearly: 31_536_000,
+};
+
+export function toI128Amount(amount: string, decimals = 7): xdr.ScVal {
+  const [whole = "0", fraction = ""] = amount.split(".");
+  const padded = (fraction + "0".repeat(decimals)).slice(0, decimals);
+  const raw = BigInt(whole + padded);
+  return nativeToScVal(raw, { type: "i128" });
+}
 
 export async function getSourceAccount(publicKey: string) {
   const account = await sorobanServer.getAccount(publicKey);
@@ -76,4 +93,25 @@ export function requireTokenContractId(): string {
   const id = env.contracts.token;
   if (!id) throw new Error("NEXT_PUBLIC_TOKEN_CONTRACT_ID is not configured.");
   return id;
+}
+
+/** Invoke subscription contract `create_plan` via Freighter. */
+export async function invokeCreatePlan(
+  merchantPublicKey: string,
+  input: CreatePlanInput
+): Promise<{ hash: string }> {
+  const contractId = requireSubscriptionContractId();
+  const { hash } = await prepareSignAndSend(merchantPublicKey, contractId, (contract) =>
+    contract.call(
+      "create_plan",
+      Address.fromString(merchantPublicKey).toScVal(),
+      nativeToScVal(input.name, { type: "string" }),
+      nativeToScVal(input.description, { type: "string" }),
+      toI128Amount(input.price),
+      nativeToScVal(input.asset, { type: "string" }),
+      nativeToScVal(INTERVAL_SECONDS[input.interval], { type: "u64" }),
+      nativeToScVal(input.trialDays ?? 0, { type: "u32" })
+    )
+  );
+  return { hash };
 }
