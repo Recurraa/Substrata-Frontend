@@ -131,3 +131,24 @@ export async function invokeSubscribe(
   );
   return { hash };
 }
+
+/** Approve the subscription contract to spend token balance. */
+export async function invokeApproveToken(
+  ownerPublicKey: string,
+  amount: string,
+  decimals = 7
+): Promise<{ hash: string }> {
+  const tokenId = requireTokenContractId();
+  const spender = requireSubscriptionContractId();
+
+  const { hash } = await prepareSignAndSend(ownerPublicKey, tokenId, (token) =>
+    token.call(
+      "approve",
+      Address.fromString(ownerPublicKey).toScVal(),
+      Address.fromString(spender).toScVal(),
+      toI128Amount(amount, decimals),
+      nativeToScVal(0, { type: "u32" })
+    )
+  );
+  return { hash };
+}
