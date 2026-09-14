@@ -115,3 +115,19 @@ export async function invokeCreatePlan(
   );
   return { hash };
 }
+
+/** Invoke subscription contract `subscribe` via Freighter. */
+export async function invokeSubscribe(
+  subscriberPublicKey: string,
+  planId: string
+): Promise<{ hash: string }> {
+  const contractId = requireSubscriptionContractId();
+  const { hash } = await prepareSignAndSend(subscriberPublicKey, contractId, (contract) =>
+    contract.call(
+      "subscribe",
+      Address.fromString(subscriberPublicKey).toScVal(),
+      nativeToScVal(planId, { type: "string" })
+    )
+  );
+  return { hash };
+}
