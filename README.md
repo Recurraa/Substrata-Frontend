@@ -195,9 +195,9 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for a deeper dive into design decisi
 
 ## Roadmap
 
-- [ ] Real Soroban contract integration (subscription + billing contracts)
+- [x] Real Soroban contract integration (subscription + billing contracts)
 - [ ] Freighter Wallet Kit multi-wallet support (xBull, Lobstr, etc.)
-- [ ] Subscriber-side plan discovery / marketplace
+- [x] Subscriber interface + plan share links
 - [ ] Email notifications via Resend
 - [ ] Stripe-style hosted payment pages
 - [ ] Mobile-responsive PWA
