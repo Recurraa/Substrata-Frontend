@@ -42,7 +42,7 @@ export function EmptyState({
 }: {
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  action?: ReactNode;
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground sm:py-20">
