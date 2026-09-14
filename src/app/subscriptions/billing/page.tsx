@@ -2,44 +2,58 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BillingTable } from "@/components/billing-table";
-import { LoadingSpinner, ErrorState } from "@/components/states";
+import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
 import { useSubscriptions, useTransactions } from "@/hooks/use-substrata";
 import { formatAmount, formatDate, formatRelativeTime } from "@/lib/utils";
 import { StatusBadge } from "@/components/status-badge";
+import { useWalletStore } from "@/stores/wallet-store";
 
 const DEMO_ADDRESS = "GDEMO...ADDR1";
 
 export default function BillingPage() {
-  const { data: subs, isLoading: subsLoading } = useSubscriptions(DEMO_ADDRESS);
+  const { address } = useWalletStore();
+  const queryAddress = address ?? DEMO_ADDRESS;
+  const { data: subs, isLoading: subsLoading, error: subsError, refetch: refetchSubs } =
+    useSubscriptions(queryAddress);
   const { data: transactions, isLoading: txLoading, error, refetch } = useTransactions();
 
-  if (subsLoading || txLoading) return <LoadingSpinner />;
-  if (error) return <ErrorState message="Failed to load billing data." onRetry={refetch} />;
+  if (subsLoading || txLoading) return <LoadingSpinner text="Loading billing…" />;
+  if (subsError || error) {
+    return (
+      <ErrorState
+        message="Failed to load billing data."
+        onRetry={() => {
+          void refetchSubs();
+          void refetch();
+        }}
+      />
+    );
+  }
 
-  // Build upcoming charges from active subscriptions
   const upcoming = (subs ?? []).filter((s) => s.status === "active");
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Billing</h1>
-        <p className="mt-1 text-muted-foreground">Upcoming charges and payment history</p>
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Billing</h1>
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+          Upcoming charges and payment history
+        </p>
       </div>
 
-      {/* Upcoming charges */}
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming Charges</CardTitle>
+          <CardTitle className="font-display">Upcoming Charges</CardTitle>
         </CardHeader>
         <CardContent>
           {upcoming.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No upcoming charges.</p>
+            <EmptyState title="No upcoming charges" description="Active subscriptions will list next payments here." />
           ) : (
             <div className="space-y-3">
               {upcoming.map((sub) => (
                 <div
                   key={sub.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
                     <p className="font-medium">{sub.plan.name}</p>
@@ -60,13 +74,18 @@ export default function BillingPage() {
         </CardContent>
       </Card>
 
-      {/* Payment history */}
       <Card>
         <CardHeader>
-          <CardTitle>Payment History</CardTitle>
+          <CardTitle className="font-display">Payment History</CardTitle>
         </CardHeader>
         <CardContent>
-          <BillingTable transactions={transactions ?? []} />
+          {!transactions?.length ? (
+            <EmptyState title="No payments yet" description="Successful charges show up in this history." />
+          ) : (
+            <div className="overflow-x-auto">
+              <BillingTable transactions={transactions} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
