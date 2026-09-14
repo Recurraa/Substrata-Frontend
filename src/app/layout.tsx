@@ -6,9 +6,9 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Substrata — Cross-Border Subscription Billing",
-  description: "Stripe for recurring global payments using Stellar rails",
-  keywords: ["stellar", "soroban", "subscription", "billing", "crypto", "payments"],
+  title: "Substrata — Recurring payments on Stellar",
+  description: "Stripe for recurring global payments — powered by Stellar Soroban",
+  keywords: ["stellar", "soroban", "subscription", "billing", "crypto", "payments", "substrata"],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
