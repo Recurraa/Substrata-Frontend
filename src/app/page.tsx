@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SiteFooter } from "@/components/site-footer";
 
 export default function Home() {
   return (
@@ -61,6 +62,9 @@ export default function Home() {
             </Button>
           </div>
         </section>
+      </div>
+      <div className="relative z-10">
+        <SiteFooter />
       </div>
     </main>
   );
