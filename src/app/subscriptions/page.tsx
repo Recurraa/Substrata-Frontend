@@ -12,13 +12,13 @@ import { notify } from "@/stores/notification-store";
 import { formatAmount, formatDate, formatRelativeTime } from "@/lib/utils";
 import { WalletButton } from "@/components/wallet-button";
 
-// Demo address — in production use wallet store address
 const DEMO_ADDRESS = "GDEMO...ADDR1";
 
 export default function SubscriptionsPage() {
-  const { isConnected } = useWalletStore();
-  const { data: subs, isLoading, error, refetch } = useSubscriptions(DEMO_ADDRESS);
-  const { mutate: cancel } = useCancelSubscription(DEMO_ADDRESS);
+  const { isConnected, address } = useWalletStore();
+  const queryAddress = address ?? DEMO_ADDRESS;
+  const { data: subs, isLoading, error, refetch } = useSubscriptions(queryAddress);
+  const { mutate: cancel } = useCancelSubscription(queryAddress);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   function handleCancel(id: string) {
@@ -37,8 +37,13 @@ export default function SubscriptionsPage() {
 
   if (!isConnected) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-24">
-        <h2 className="text-xl font-semibold">Connect your wallet to view subscriptions</h2>
+      <div className="flex flex-col items-center justify-center gap-4 px-4 py-16 text-center sm:py-24">
+        <h2 className="font-display text-xl font-semibold sm:text-2xl">
+          Connect your wallet to view subscriptions
+        </h2>
+        <p className="max-w-md text-sm text-muted-foreground">
+          Substrata uses Freighter so you stay in control of every recurring payment.
+        </p>
         <WalletButton />
       </div>
     );
@@ -47,38 +52,45 @@ export default function SubscriptionsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Subscriptions</h1>
-        <p className="mt-1 text-muted-foreground">Manage your active subscriptions</p>
+        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          My Subscriptions
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+          Manage your active subscriptions
+        </p>
       </div>
 
-      {isLoading && <LoadingSpinner />}
-      {error && <ErrorState message="Failed to load subscriptions." onRetry={refetch} />}
-      {!isLoading && subs?.length === 0 && (
-        <EmptyState title="No subscriptions" description="Browse plans to subscribe to a service." />
+      {isLoading && <LoadingSpinner text="Loading subscriptions…" />}
+      {error && <ErrorState message="Failed to load subscriptions." onRetry={() => refetch()} />}
+      {!isLoading && !error && subs?.length === 0 && (
+        <EmptyState
+          title="No subscriptions"
+          description="Browse plans to subscribe to a service."
+        />
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {subs?.map((sub) => (
           <Card key={sub.id}>
             <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg">{sub.plan.name}</CardTitle>
+              <div className="flex items-start justify-between gap-2">
+                <CardTitle className="font-display text-lg">{sub.plan.name}</CardTitle>
                 <StatusBadge status={sub.status} />
               </div>
               <p className="text-sm text-muted-foreground">{sub.plan.description}</p>
             </CardHeader>
 
             <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">Amount</span>
                 <span className="font-medium">{formatAmount(sub.plan.price, sub.plan.asset)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <span className="text-muted-foreground">Started</span>
                 <span>{formatDate(sub.startedAt)}</span>
               </div>
               {sub.status === "active" && (
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-muted-foreground">Next billing</span>
                   <span className="font-medium text-primary">
                     {formatRelativeTime(sub.nextBillingAt)}
