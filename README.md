@@ -227,3 +227,9 @@ Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) before opening a PR.
 ## License
 
 [MIT](LICENSE) © Sorobill Contributors
+
+## Checkout
+
+- Public plans: `/plans`
+- Pay link: `/pay/[planId]`
+- Demo: `docs/DEMO_SCRIPT.md`
