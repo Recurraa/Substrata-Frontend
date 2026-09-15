@@ -10,25 +10,31 @@ import {
   nativeToScVal,
   BASE_FEE,
   SorobanRpc,
-  type xdr,
+  xdr,
 } from "@stellar/stellar-sdk";
 import { signTransaction } from "@stellar/freighter-api";
 import { env } from "@/lib/env";
 import { NETWORK_PASSPHRASE, sorobanServer } from "@/lib/stellar";
-import type { CreatePlanInput } from "@/types";
-
-const INTERVAL_SECONDS: Record<CreatePlanInput["interval"], number> = {
-  daily: 86_400,
-  weekly: 604_800,
-  monthly: 2_592_000,
-  yearly: 31_536_000,
-};
+import type { BillingInterval, CreatePlanInput } from "@/types";
 
 export function toI128Amount(amount: string, decimals = 7): xdr.ScVal {
   const [whole = "0", fraction = ""] = amount.split(".");
   const padded = (fraction + "0".repeat(decimals)).slice(0, decimals);
   const raw = BigInt(whole + padded);
   return nativeToScVal(raw, { type: "i128" });
+}
+
+/** Encode contract BillingInterval unit variants for Soroban. */
+export function billingIntervalToScVal(interval: BillingInterval): xdr.ScVal {
+  const tag =
+    interval === "daily"
+      ? "Daily"
+      : interval === "weekly"
+        ? "Weekly"
+        : interval === "yearly"
+          ? "Yearly"
+          : "Monthly";
+  return xdr.ScVal.scvVec([xdr.ScVal.scvSymbol(tag)]);
 }
 
 export async function getSourceAccount(publicKey: string) {
@@ -95,10 +101,14 @@ export function requireTokenContractId(): string {
   return id;
 }
 
-/** Invoke subscription contract `create_plan` via Freighter. */
+/**
+ * Invoke subscription contract `create_plan` via Freighter.
+ * Matches contract 0.3: (merchant, name, description, price, interval, token).
+ */
 export async function invokeCreatePlan(
   merchantPublicKey: string,
-  input: CreatePlanInput
+  input: CreatePlanInput,
+  tokenContractId = requireTokenContractId()
 ): Promise<{ hash: string }> {
   const contractId = requireSubscriptionContractId();
   const { hash } = await prepareSignAndSend(merchantPublicKey, contractId, (contract) =>
@@ -106,27 +116,34 @@ export async function invokeCreatePlan(
       "create_plan",
       Address.fromString(merchantPublicKey).toScVal(),
       nativeToScVal(input.name, { type: "string" }),
-      nativeToScVal(input.description, { type: "string" }),
+      nativeToScVal(input.description ?? "", { type: "string" }),
       toI128Amount(input.price),
-      nativeToScVal(input.asset, { type: "string" }),
-      nativeToScVal(INTERVAL_SECONDS[input.interval], { type: "u64" }),
-      nativeToScVal(input.trialDays ?? 0, { type: "u32" })
+      billingIntervalToScVal(input.interval),
+      Address.fromString(tokenContractId).toScVal()
     )
   );
   return { hash };
 }
 
-/** Invoke subscription contract `subscribe` via Freighter. */
+/**
+ * Invoke subscription contract `subscribe` via Freighter.
+ * planId must be the on-chain u64 plan id (contractPlanId), not the API UUID.
+ */
 export async function invokeSubscribe(
   subscriberPublicKey: string,
-  planId: string
+  contractPlanId: number | string
 ): Promise<{ hash: string }> {
+  const planId = typeof contractPlanId === "string" ? Number(contractPlanId) : contractPlanId;
+  if (!Number.isFinite(planId) || planId < 0) {
+    throw new Error("Invalid on-chain plan id for subscribe");
+  }
+
   const contractId = requireSubscriptionContractId();
   const { hash } = await prepareSignAndSend(subscriberPublicKey, contractId, (contract) =>
     contract.call(
       "subscribe",
       Address.fromString(subscriberPublicKey).toScVal(),
-      nativeToScVal(planId, { type: "string" })
+      nativeToScVal(BigInt(planId), { type: "u64" })
     )
   );
   return { hash };
