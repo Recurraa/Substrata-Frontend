@@ -9,6 +9,8 @@ Sorobill is an open-source, production-ready frontend for a cross-border subscri
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org)
 [![Stellar](https://img.shields.io/badge/Stellar-Soroban-7B2FBE)](https://stellar.org)
 
+**Live demo:** [https://sorobill-app.vercel.app](https://sorobill-app.vercel.app)
+
 ---
 
 ## Table of Contents
@@ -125,7 +127,7 @@ Copy `.env.example` to `.env.local` and fill in the values:
 | `NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_ID` | Deployed subscription contract | — |
 | `NEXT_PUBLIC_BILLING_CONTRACT_ID` | Deployed billing contract | — |
 | `NEXT_PUBLIC_TOKEN_CONTRACT_ID` | Token contract (USDC etc.) | — |
-| `NEXT_PUBLIC_APP_URL` | Your app's public URL | `http://localhost:3000` |
+| `NEXT_PUBLIC_APP_URL` | Your app's public URL | `https://sorobill-app.vercel.app` |
 | `NEXT_PUBLIC_WEBHOOK_SECRET` | HMAC secret for webhook signing | — |
 
 > **Note:** The app runs fully on mock data without contract IDs. Set them to connect to real Soroban contracts.

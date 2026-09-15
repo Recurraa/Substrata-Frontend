@@ -51,4 +51,7 @@ npx vercel --prod
 
 Set env in the Vercel dashboard (or import `.env.production`):
 - `NEXT_PUBLIC_USE_MOCK=true` for a working public demo
+- `NEXT_PUBLIC_APP_URL=https://sorobill-app.vercel.app`
 - Contract ID / API URL when you go live
+
+Live: [https://sorobill-app.vercel.app](https://sorobill-app.vercel.app)
