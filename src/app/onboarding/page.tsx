@@ -141,7 +141,7 @@ export default function OnboardingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <CreatePlanDialog merchantId="merchant_1" />
+              <CreatePlanDialog merchantId={""} />
               <Button variant="outline" className="w-full" onClick={() => complete()}>
                 Skip for now
               </Button>
