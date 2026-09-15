@@ -19,8 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useCreatePlan } from "@/hooks/use-sorobill";
+import { useQueryClient } from "@tanstack/react-query";
+import { createPlan, syncPlanContract } from "@/lib/api";
+import { invokeCreatePlan } from "@/lib/contract";
+import { env } from "@/lib/env";
 import { notify } from "@/stores/notification-store";
+import { useWalletStore } from "@/stores/wallet-store";
 import type { BillingInterval, SupportedAsset } from "@/types";
 
 const ASSETS: SupportedAsset[] = ["USDC", "EURC", "XLM"];
@@ -28,6 +32,7 @@ const INTERVALS: BillingInterval[] = ["daily", "weekly", "monthly", "yearly"];
 
 export function CreatePlanDialog({ merchantId }: { merchantId: string }) {
   const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -36,22 +41,58 @@ export function CreatePlanDialog({ merchantId }: { merchantId: string }) {
     interval: "monthly" as BillingInterval,
     trialDays: "0",
   });
+  const address = useWalletStore((s) => s.address);
+  const queryClient = useQueryClient();
+  const effectiveMerchant = address || merchantId;
 
-  const { mutate, isPending } = useCreatePlan(merchantId);
-
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    mutate(
-      { ...form, trialDays: parseInt(form.trialDays, 10) },
-      {
-        onSuccess: () => {
-          notify("success", "Plan created", `"${form.name}" is now live.`);
-          setOpen(false);
-          setForm({ name: "", description: "", price: "", asset: "USDC", interval: "monthly", trialDays: "0" });
-        },
-        onError: (err) => notify("error", "Failed to create plan", err.message),
+    if (!effectiveMerchant) {
+      notify("error", "Connect Freighter", "A merchant wallet is required to create a plan.");
+      return;
+    }
+
+    setPending(true);
+    const input = {
+      name: form.name,
+      description: form.description,
+      price: form.price,
+      asset: form.asset,
+      interval: form.interval,
+      trialDays: parseInt(form.trialDays, 10),
+    };
+
+    try {
+      const plan = await createPlan(effectiveMerchant, input);
+
+      if (!env.app.useMock && address && env.contracts.subscription && env.contracts.token) {
+        notify("info", "Confirm in Freighter", "Creating the on-chain plan…");
+        const { contractPlanId, hash } = await invokeCreatePlan(address, input);
+        await syncPlanContract(plan.id, contractPlanId, env.contracts.token);
+        notify(
+          "success",
+          "Plan created on-chain",
+          `"${form.name}" → plan #${contractPlanId} (${hash.slice(0, 8)}…)`
+        );
+      } else {
+        notify("success", "Plan created", `"${form.name}" is now live.`);
       }
-    );
+
+      await queryClient.invalidateQueries({ queryKey: ["plans", effectiveMerchant] });
+      setOpen(false);
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        asset: "USDC",
+        interval: "monthly",
+        trialDays: "0",
+      });
+    } catch (err) {
+      notify("error", "Failed to create plan", err instanceof Error ? err.message : "Error");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -68,7 +109,7 @@ export function CreatePlanDialog({ merchantId }: { merchantId: string }) {
           <DialogTitle>Create Subscription Plan</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="name">Plan Name</Label>
             <Input
@@ -107,12 +148,19 @@ export function CreatePlanDialog({ merchantId }: { merchantId: string }) {
 
             <div className="space-y-1.5">
               <Label>Asset</Label>
-              <Select value={form.asset} onValueChange={(v) => setForm((f) => ({ ...f, asset: v as SupportedAsset }))}>
+              <Select
+                value={form.asset}
+                onValueChange={(v) => setForm((f) => ({ ...f, asset: v as SupportedAsset }))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ASSETS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                  {ASSETS.map((a) => (
+                    <SelectItem key={a} value={a}>
+                      {a}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -121,12 +169,19 @@ export function CreatePlanDialog({ merchantId }: { merchantId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Billing Interval</Label>
-              <Select value={form.interval} onValueChange={(v) => setForm((f) => ({ ...f, interval: v as BillingInterval }))}>
+              <Select
+                value={form.interval}
+                onValueChange={(v) => setForm((f) => ({ ...f, interval: v as BillingInterval }))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {INTERVALS.map((i) => <SelectItem key={i} value={i} className="capitalize">{i}</SelectItem>)}
+                  {INTERVALS.map((i) => (
+                    <SelectItem key={i} value={i} className="capitalize">
+                      {i}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -143,9 +198,15 @@ export function CreatePlanDialog({ merchantId }: { merchantId: string }) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isPending ? "Creating…" : "Create Plan"}
+          <p className="text-xs text-muted-foreground">
+            {address
+              ? "Will also submit create_plan via Freighter when contract IDs are configured."
+              : "Connect Freighter to create the on-chain plan after the API row."}
+          </p>
+
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {pending ? "Creating…" : "Create Plan"}
           </Button>
         </form>
       </DialogContent>
