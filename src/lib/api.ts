@@ -316,7 +316,14 @@ export async function fetchMerchantStats(merchantId: string): Promise<MerchantSt
 
 export async function fetchRevenueData(merchantId: string): Promise<RevenueDataPoint[]> {
   if (!USE_MOCK) {
-    return apiFetch<RevenueDataPoint[]>(`/merchants/${encodeURIComponent(merchantId)}/revenue`);
+    const rows = await apiFetch<{ date: string; amount?: string; revenue?: number; subscribers?: number }[]>(
+      `/merchants/${encodeURIComponent(merchantId)}/revenue`
+    );
+    return rows.map((r) => ({
+      date: r.date,
+      revenue: typeof r.revenue === "number" ? r.revenue : parseFloat(r.amount ?? "0") || 0,
+      subscribers: r.subscribers ?? 0,
+    }));
   }
   await delay();
   return MOCK_REVENUE_DATA;
