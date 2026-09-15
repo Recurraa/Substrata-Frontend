@@ -5,12 +5,21 @@ import { RevenueChart } from "@/components/revenue-chart";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
 import { useRevenueData, useMerchantStats } from "@/hooks/use-sorobill";
 import { formatAmount } from "@/lib/utils";
-
-const MERCHANT_ID = "merchant_1";
+import { useWalletStore } from "@/stores/wallet-store";
 
 export default function AnalyticsPage() {
-  const { data: revenue, isLoading, error, refetch } = useRevenueData(MERCHANT_ID);
-  const { data: stats, isLoading: statsLoading } = useMerchantStats(MERCHANT_ID);
+  const address = useWalletStore((s) => s.address) ?? "";
+  const { data: revenue, isLoading, error, refetch } = useRevenueData(address);
+  const { data: stats, isLoading: statsLoading } = useMerchantStats(address);
+
+  if (!address) {
+    return (
+      <EmptyState
+        title="Connect your merchant wallet"
+        description="Freighter is required to load analytics."
+      />
+    );
+  }
 
   if (isLoading || statsLoading) return <LoadingSpinner text="Loading analytics…" />;
   if (error) return <ErrorState message="Failed to load analytics." onRetry={() => refetch()} />;

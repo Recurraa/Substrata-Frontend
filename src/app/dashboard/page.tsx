@@ -8,18 +8,27 @@ import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMerchantStats, useRevenueData, useTransactions } from "@/hooks/use-sorobill";
 import { formatAmount } from "@/lib/utils";
-
-const MERCHANT_ID = "merchant_1";
+import { useWalletStore } from "@/stores/wallet-store";
 
 export default function DashboardPage() {
+  const address = useWalletStore((s) => s.address) ?? "";
   const {
     data: stats,
     isLoading: statsLoading,
     error: statsError,
     refetch: refetchStats,
-  } = useMerchantStats(MERCHANT_ID);
-  const { data: revenue, isLoading: revenueLoading, error: revenueError } = useRevenueData(MERCHANT_ID);
+  } = useMerchantStats(address);
+  const { data: revenue, isLoading: revenueLoading, error: revenueError } = useRevenueData(address);
   const { data: transactions, isLoading: txLoading, error: txError } = useTransactions();
+
+  if (!address) {
+    return (
+      <EmptyState
+        title="Connect your merchant wallet"
+        description="Freighter is required to load dashboard stats."
+      />
+    );
+  }
 
   if (statsLoading) return <LoadingSpinner text="Loading dashboard…" />;
   if (statsError) {
