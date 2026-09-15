@@ -2,26 +2,61 @@
 
 import { StatusBadge } from "@/components/status-badge";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
+import { Button } from "@/components/ui/button";
 import { useSubscriptions } from "@/hooks/use-sorobill";
+import { downloadCsv, toCsv } from "@/lib/csv";
 import { formatDate, formatRelativeTime, shortenAddress } from "@/lib/utils";
-
-const MERCHANT_ADDRESS = "GMERCHANT...ADDR";
+import { useWalletStore } from "@/stores/wallet-store";
 
 export default function SubscribersPage() {
-  const { data: subs, isLoading, error, refetch } = useSubscriptions(MERCHANT_ADDRESS);
+  const address = useWalletStore((s) => s.address);
+  const { data: subs, isLoading, error, refetch } = useSubscriptions(address ?? "");
+
+  function exportCsv() {
+    if (!subs?.length) return;
+    const csv = toCsv(
+      subs.map((s) => ({
+        id: s.id,
+        subscriber: s.subscriberAddress,
+        plan: s.plan.name,
+        status: s.status,
+        startedAt: s.startedAt,
+        nextBillingAt: s.nextBillingAt,
+      }))
+    );
+    downloadCsv(`sorobill-subscribers-${Date.now()}.csv`, csv);
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Subscribers</h1>
-        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-          All active and past subscribers
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+            Subscribers
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+            All active and past subscribers
+          </p>
+        </div>
+        {subs && subs.length > 0 && (
+          <Button variant="outline" size="sm" onClick={exportCsv}>
+            Export CSV
+          </Button>
+        )}
       </div>
 
-      {isLoading && <LoadingSpinner text="Loading subscribers…" />}
-      {error && <ErrorState message="Failed to load subscribers." onRetry={() => refetch()} />}
-      {!isLoading && !error && subs?.length === 0 && (
+      {!address && (
+        <EmptyState
+          title="Connect your merchant wallet"
+          description="Freighter is required to load subscribers for your plans."
+        />
+      )}
+
+      {address && isLoading && <LoadingSpinner text="Loading subscribers…" />}
+      {address && error && (
+        <ErrorState message="Failed to load subscribers." onRetry={() => refetch()} />
+      )}
+      {address && !isLoading && !error && subs?.length === 0 && (
         <EmptyState
           title="No subscribers yet"
           description="Share your plans to start getting subscribers."
@@ -30,10 +65,9 @@ export default function SubscribersPage() {
 
       {subs && subs.length > 0 && (
         <>
-          {/* Mobile cards */}
           <div className="space-y-3 md:hidden">
             {subs.map((sub) => (
-              <div key={sub.id} className="rounded-lg border p-4 space-y-2">
+              <div key={sub.id} className="space-y-2 rounded-lg border p-4">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-mono text-sm">{shortenAddress(sub.subscriberAddress)}</p>
                   <StatusBadge status={sub.status} />
@@ -47,7 +81,6 @@ export default function SubscribersPage() {
             ))}
           </div>
 
-          {/* Desktop table */}
           <div className="hidden overflow-x-auto rounded-lg border md:block">
             <table className="w-full text-sm">
               <thead>
