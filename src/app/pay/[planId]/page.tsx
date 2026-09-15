@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { PayHero } from "@/components/pay-hero";
 import { WalletButton } from "@/components/wallet-button";
+import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { LoadingState, ErrorState, EmptyState } from "@/components/states";
 import { env } from "@/lib/env";
@@ -17,14 +18,14 @@ async function fetchPlan(id: string): Promise<ApiPlan> {
   if (env.app.useMock) {
     return {
       id,
-      name: "Pro Plan",
-      description: "Demo plan for Sorobill checkout",
-      amount: "10",
+      name: id.includes("2") ? "Pro" : "Starter",
+      description: "Recurring payment settled on Stellar Soroban.",
+      amount: id.includes("2") ? "29.99" : "9.99",
       assetCode: "USDC",
       interval: "MONTHLY",
       isActive: true,
-      merchantAddress: "GDEMO",
-      contractPlanId: 1,
+      merchantAddress: "GDEMO_MERCHANT",
+      contractPlanId: id.includes("2") ? 2 : 1,
       createdAt: new Date().toISOString(),
     };
   }
@@ -62,10 +63,9 @@ export default function PayPlanPage({
     setStatus(null);
     try {
       if (env.app.useMock) {
-        setStatus("Mock mode: subscription recorded locally.");
+        setStatus("Demo mode: subscription recorded. Connect contracts for live Freighter flow.");
         return;
       }
-      // Approve enough for several periods so Freighter is not needed every cycle.
       const approveAmount = String(Number(data.amount) * 12);
       setStatus("Approving token allowance…");
       await invokeApproveToken(address, approveAmount);
@@ -91,52 +91,65 @@ export default function PayPlanPage({
     );
   }
   if (!data) {
-    return <EmptyState title="Plan not found" description="Check the share link and try again." />;
+    return (
+      <EmptyState title="Plan not found" description="Check the share link and try again." />
+    );
   }
 
   const plan = mapApiPlan(data);
 
   return (
-    <main className="mx-auto min-h-screen max-w-3xl space-y-8 px-6 py-10">
-      <header className="flex items-center justify-between">
-        <Link href="/" className="font-display text-xl font-bold">
-          Sorobill
-        </Link>
-        <WalletButton />
-      </header>
+    <main className="checkout-rail min-h-screen">
+      <div className="mx-auto max-w-lg px-6 py-8 sm:py-12">
+        <header className="mb-10 flex items-center justify-between">
+          <BrandMark />
+          <WalletButton />
+        </header>
 
-      <PayHero
-        planName={plan.name}
-        priceLabel={formatAssetAmount(plan.price, plan.asset)}
-        intervalLabel={formatInterval(plan.interval)}
-      />
+        <PayHero
+          planName={plan.name}
+          priceLabel={formatAssetAmount(plan.price, plan.asset)}
+          intervalLabel={formatInterval(plan.interval)}
+        />
 
-      <section id="subscribe" className="space-y-4 rounded-xl border border-border p-6">
-        <h2 className="font-display text-lg font-semibold">Subscribe</h2>
-        <p className="text-sm text-muted-foreground">
-          {plan.description || "Recurring payment settled on Stellar Soroban."}
-        </p>
-        {!address ? (
-          <p className="text-sm text-amber-700 dark:text-amber-300">
-            Connect Freighter on Testnet to continue.
+        <section id="subscribe" className="mt-8 space-y-5">
+          <h2 className="text-lg font-semibold">Subscribe</h2>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {plan.description || "Recurring payment settled on Stellar Soroban."}
           </p>
-        ) : (
-          <Button
-            className="w-full sm:w-auto"
-            aria-label={`Subscribe to ${plan.name}`}
-            disabled={busy}
-            onClick={() => void handleSubscribe()}
-          >
-            {busy ? "Confirm in Freighter…" : "Approve & subscribe"}
-          </Button>
-        )}
-        {status && <p className="text-sm text-emerald-700 dark:text-emerald-300">{status}</p>}
-        {errorMsg && <p className="text-sm text-destructive">{errorMsg}</p>}
-        <p className="text-xs text-muted-foreground">
-          Merchant:{" "}
-          <span className="font-mono">{plan.merchantId || "—"}</span>
-        </p>
-      </section>
+
+          <div className="space-y-3 border border-border bg-background p-5">
+            {!address ? (
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                Connect Freighter on Testnet to continue.
+              </p>
+            ) : (
+              <Button
+                className="w-full"
+                size="lg"
+                aria-label={`Subscribe to ${plan.name}`}
+                disabled={busy}
+                onClick={() => void handleSubscribe()}
+              >
+                {busy ? "Confirm in Freighter…" : "Approve & subscribe"}
+              </Button>
+            )}
+            {status && (
+              <p className="text-sm text-sea">{status}</p>
+            )}
+            {errorMsg && <p className="text-sm text-destructive">{errorMsg}</p>}
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Merchant{" "}
+            <span className="font-mono">{plan.merchantId || "—"}</span>
+            {" · "}
+            <Link href="/plans" className="text-sea hover:underline">
+              All plans
+            </Link>
+          </p>
+        </section>
+      </div>
     </main>
   );
 }

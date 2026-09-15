@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export function PayHero({
   planName,
@@ -14,29 +12,29 @@ export function PayHero({
   intervalLabel: string;
 }) {
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-teal-400/20 bg-slate-950 px-6 py-12 text-white sm:px-10">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(45,212,191,0.18),_transparent_55%)]" />
-      <div className="relative z-10 max-w-xl space-y-4">
-        <p className="font-display text-sm font-semibold tracking-wide text-teal-300/90">
-          Sorobill Checkout
-        </p>
-        <h1 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          {planName}
-        </h1>
-        <p className="text-lg text-teal-50/80">
-          <span className="font-semibold text-white">{priceLabel}</span>
-          <span className="text-teal-100/60"> / {intervalLabel}</span>
-        </p>
-        <p className="text-sm text-teal-100/60">
-          Settles on Stellar. You approve an allowance; billing runs on-chain.
-        </p>
-        <Button asChild className="bg-teal-400 text-slate-950 hover:bg-teal-300">
-          <Link href="#subscribe">
-            Continue
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
+    <section className="border-b border-border pb-8 pt-2">
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        Checkout
+      </p>
+      <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
+        {planName}
+      </h1>
+      <p className="mt-3 flex flex-wrap items-baseline gap-2">
+        <span className="font-display text-3xl font-semibold tabular-nums text-ink">
+          {priceLabel}
+        </span>
+        <span className="text-sm text-muted-foreground">/ {intervalLabel}</span>
+      </p>
+      <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+        Settles on Stellar Soroban. You approve a token allowance; recurring charges run
+        on-chain without sharing your keys.
+      </p>
+      <Link
+        href="#subscribe"
+        className="mt-5 inline-block text-sm font-medium text-sea hover:underline"
+      >
+        Continue to approve →
+      </Link>
     </section>
   );
 }

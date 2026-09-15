@@ -1,10 +1,10 @@
-import { Networks, SorobanRpc } from "@stellar/stellar-sdk";
+import { Networks, rpc } from "@stellar/stellar-sdk";
 import { env } from "@/lib/env";
 
 export const NETWORK_PASSPHRASE =
   env.stellar.network === "mainnet" ? Networks.PUBLIC : Networks.TESTNET;
 
-export const sorobanServer = new SorobanRpc.Server(env.stellar.rpcUrl, {
+export const sorobanServer = new rpc.Server(env.stellar.rpcUrl, {
   allowHttp: env.stellar.network === "testnet",
 });
 

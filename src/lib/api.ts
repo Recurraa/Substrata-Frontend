@@ -162,7 +162,8 @@ export async function fetchPlans(merchantId: string): Promise<Plan[]> {
     return rows.map((p) => mapApiPlan(p));
   }
   await delay();
-  return MOCK_PLANS.filter((p) => p.merchantId === merchantId);
+  // Demo mode: show seed plans for any connected merchant wallet
+  return MOCK_PLANS.map((p) => ({ ...p, merchantId: merchantId || p.merchantId }));
 }
 
 export async function fetchPlan(planId: string): Promise<Plan> {
@@ -267,9 +268,11 @@ export async function fetchSubscriptions(address: string): Promise<Subscription[
     return rows.map(mapApiSubscription);
   }
   await delay();
-  return MOCK_SUBSCRIPTIONS.filter(
-    (s) => s.subscriberAddress === address || s.merchantAddress === address
-  );
+  // Demo mode: return sample subscribers for any connected wallet
+  return MOCK_SUBSCRIPTIONS.map((s) => ({
+    ...s,
+    merchantAddress: address || s.merchantAddress,
+  }));
 }
 
 export async function cancelSubscription(subscriptionId: string): Promise<Subscription> {

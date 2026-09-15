@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Send, CheckCircle2, XCircle, Clock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -14,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Navbar } from "@/components/navbar";
 import { env } from "@/lib/env";
 import {
   BACKEND_WEBHOOK_EVENT_TYPES,
@@ -88,6 +85,18 @@ export default function WebhooksPage() {
       });
       notify("success", "Test event queued", selectedType);
       if (!useMock) await refresh();
+      else {
+        setEvents((prev) => [
+          {
+            id: `wh_${Date.now()}`,
+            type: selectedType,
+            payload: { source: "demo" },
+            createdAt: new Date().toISOString(),
+            deliveries: [{ status: "DELIVERED", attemptCount: 1 }],
+          },
+          ...prev,
+        ]);
+      }
     } catch (err) {
       notify("error", "Fire failed", err instanceof Error ? err.message : "Error");
     } finally {
@@ -96,156 +105,142 @@ export default function WebhooksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h1 className="text-3xl font-bold">Webhooks</h1>
-              <p className="mt-1 text-muted-foreground">
-                {useMock
-                  ? "Mock mode — registration and test fires stay local."
-                  : "Register endpoints and fire test events against the billing API."}
-              </p>
-            </div>
-            {!useMock && (
-              <Button variant="outline" size="sm" onClick={() => void refresh()}>
-                <RefreshCw className="h-4 w-4" />
-                Refresh
-              </Button>
-            )}
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Register endpoint</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Endpoint URL</Label>
-                  <Input
-                    value={webhookUrl}
-                    onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://yourapp.com/webhooks"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Signing secret</Label>
-                  <Input value={secret} onChange={(e) => setSecret(e.target.value)} />
-                </div>
-                <Button className="w-full" onClick={() => void registerEndpoint()} disabled={busy}>
-                  Register
-                </Button>
-                {endpoints.length > 0 && (
-                  <ul className="space-y-2 text-sm">
-                    {endpoints.map((ep) => (
-                      <li key={ep.id} className="rounded-md border px-3 py-2 font-mono text-xs">
-                        {ep.url}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Fire test event</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Event Type</Label>
-                  <Select
-                    value={selectedType}
-                    onValueChange={(v) => setSelectedType(v as BackendWebhookEventType)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BACKEND_WEBHOOK_EVENT_TYPES.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button className="w-full" onClick={() => void fireEvent()} disabled={busy}>
-                  <Send className="h-4 w-4" />
-                  {busy ? "Sending…" : "Send Event"}
-                </Button>
-                {selectedEvent && (
-                  <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
-                    {JSON.stringify(selectedEvent.payload, null, 2)}
-                  </pre>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Event log</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {events.length === 0 ? (
-                <p className="py-6 text-center text-sm text-muted-foreground">
-                  No webhook events yet. Register an endpoint and fire a test event.
-                </p>
-              ) : (
-                <div className="overflow-x-auto rounded-lg border">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="px-4 py-3 text-left font-medium">Event</th>
-                        <th className="px-4 py-3 text-left font-medium">Deliveries</th>
-                        <th className="px-4 py-3 text-left font-medium">Time</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {events.map((ev) => {
-                        const delivered = ev.deliveries?.some((d) => d.status === "DELIVERED");
-                        const failed = ev.deliveries?.some((d) => d.status === "FAILED");
-                        return (
-                          <tr
-                            key={ev.id}
-                            className="cursor-pointer border-b last:border-0 hover:bg-muted/30"
-                            onClick={() => setSelectedEvent(ev)}
-                          >
-                            <td className="px-4 py-3 font-mono text-xs">{ev.type}</td>
-                            <td className="px-4 py-3">
-                              {delivered ? (
-                                <span className="flex items-center gap-1 text-green-600">
-                                  <CheckCircle2 className="h-3.5 w-3.5" /> Delivered
-                                </span>
-                              ) : failed ? (
-                                <span className="flex items-center gap-1 text-red-600">
-                                  <XCircle className="h-3.5 w-3.5" /> Failed
-                                </span>
-                              ) : (
-                                <Badge variant="secondary">Pending</Badge>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3.5 w-3.5" />
-                                {formatDate(ev.createdAt)}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+    <div className="space-y-10">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            Integrations
+          </p>
+          <h1 className="mt-1 text-3xl font-semibold">Webhooks</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {useMock
+              ? "Demo mode — register and fire events locally."
+              : "Register endpoints and verify HMAC delivery against the billing API."}
+          </p>
         </div>
-      </main>
+        {!useMock && (
+          <Button variant="outline" size="sm" onClick={() => void refresh()}>
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        )}
+      </div>
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <section className="space-y-4 border border-border p-5">
+          <h2 className="text-lg font-semibold">Register endpoint</h2>
+          <div className="space-y-1.5">
+            <Label>URL</Label>
+            <Input
+              value={webhookUrl}
+              onChange={(e) => setWebhookUrl(e.target.value)}
+              placeholder="https://yourapp.com/webhooks"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Signing secret</Label>
+            <Input value={secret} onChange={(e) => setSecret(e.target.value)} />
+          </div>
+          <Button onClick={() => void registerEndpoint()} disabled={busy}>
+            Register
+          </Button>
+          {endpoints.length > 0 && (
+            <ul className="space-y-2 border-t border-border pt-4 text-xs">
+              {endpoints.map((ep) => (
+                <li key={ep.id} className="truncate font-mono text-muted-foreground">
+                  {ep.url}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="space-y-4 border border-border p-5">
+          <h2 className="text-lg font-semibold">Fire test event</h2>
+          <div className="space-y-1.5">
+            <Label>Type</Label>
+            <Select
+              value={selectedType}
+              onValueChange={(v) => setSelectedType(v as BackendWebhookEventType)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {BACKEND_WEBHOOK_EVENT_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button onClick={() => void fireEvent()} disabled={busy}>
+            <Send className="h-4 w-4" />
+            {busy ? "Sending…" : "Send event"}
+          </Button>
+          {selectedEvent && (
+            <pre className="overflow-x-auto bg-muted/50 p-3 text-xs">
+              {JSON.stringify(selectedEvent.payload, null, 2)}
+            </pre>
+          )}
+        </section>
+      </div>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Event log</h2>
+        {events.length === 0 ? (
+          <p className="border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
+            No events yet. Register an endpoint and fire a test.
+          </p>
+        ) : (
+          <div className="overflow-x-auto border border-border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <th className="px-4 py-3 font-medium">Event</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((ev) => {
+                  const delivered = ev.deliveries?.some((d) => d.status === "DELIVERED");
+                  const failed = ev.deliveries?.some((d) => d.status === "FAILED");
+                  return (
+                    <tr
+                      key={ev.id}
+                      className="cursor-pointer border-b last:border-0 hover:bg-muted/30"
+                      onClick={() => setSelectedEvent(ev)}
+                    >
+                      <td className="px-4 py-3 font-mono text-xs">{ev.type}</td>
+                      <td className="px-4 py-3">
+                        {delivered ? (
+                          <span className="inline-flex items-center gap-1 text-sea">
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Delivered
+                          </span>
+                        ) : failed ? (
+                          <span className="inline-flex items-center gap-1 text-destructive">
+                            <XCircle className="h-3.5 w-3.5" /> Failed
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">Pending</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          {formatDate(ev.createdAt)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

@@ -1,9 +1,11 @@
 export const env = {
   stellar: {
-    network: process.env.NEXT_PUBLIC_STELLAR_NETWORK as "testnet" | "mainnet",
-    rpcUrl: process.env.NEXT_PUBLIC_STELLAR_RPC_URL!,
-    horizonUrl: process.env.NEXT_PUBLIC_STELLAR_HORIZON_URL!,
-    passphrase: process.env.NEXT_PUBLIC_STELLAR_PASSPHRASE!,
+    network: (process.env.NEXT_PUBLIC_STELLAR_NETWORK as "testnet" | "mainnet") || "testnet",
+    rpcUrl: process.env.NEXT_PUBLIC_STELLAR_RPC_URL ?? "https://soroban-testnet.stellar.org",
+    horizonUrl:
+      process.env.NEXT_PUBLIC_STELLAR_HORIZON_URL ?? "https://horizon-testnet.stellar.org",
+    passphrase:
+      process.env.NEXT_PUBLIC_STELLAR_PASSPHRASE ?? "Test SDF Network ; September 2015",
   },
   contracts: {
     subscription: process.env.NEXT_PUBLIC_SUBSCRIPTION_CONTRACT_ID ?? "",
@@ -14,7 +16,8 @@ export const env = {
     url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
     name: process.env.NEXT_PUBLIC_APP_NAME ?? "Sorobill",
     apiUrl: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1",
-    useMock: process.env.NEXT_PUBLIC_USE_MOCK === "true",
+    // Default mock on for easy demos; set NEXT_PUBLIC_USE_MOCK=false for live API
+    useMock: process.env.NEXT_PUBLIC_USE_MOCK !== "false",
   },
   webhookSecret: process.env.NEXT_PUBLIC_WEBHOOK_SECRET ?? "",
 } as const;

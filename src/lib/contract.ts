@@ -9,7 +9,7 @@ import {
   Address,
   nativeToScVal,
   BASE_FEE,
-  SorobanRpc,
+  rpc,
   scValToNative,
   xdr,
 } from "@stellar/stellar-sdk";
@@ -63,14 +63,14 @@ export async function prepareSignAndSend(
     .build();
 
   const simulated = await sorobanServer.simulateTransaction(tx);
-  if (SorobanRpc.isSimulationError(simulated)) {
+  if (rpc.Api.isSimulationError(simulated)) {
     throw new Error(simulated.error ?? "Soroban simulation failed");
   }
 
   const prepared = await sorobanServer.prepareTransaction(tx);
   const signResult = await signTransaction(prepared.toXDR(), {
     networkPassphrase: NETWORK_PASSPHRASE,
-    address: publicKey,
+    accountToSign: publicKey,
   });
 
   const signedXdr =
@@ -89,7 +89,7 @@ export async function prepareSignAndSend(
 
   let status = await sorobanServer.getTransaction(sent.hash);
   const started = Date.now();
-  while (status.status === SorobanRpc.Api.GetTransactionStatus.NOT_FOUND) {
+  while (status.status === rpc.Api.GetTransactionStatus.NOT_FOUND) {
     if (Date.now() - started > 60_000) {
       throw new Error(`Timed out waiting for tx ${sent.hash}`);
     }
@@ -97,7 +97,7 @@ export async function prepareSignAndSend(
     status = await sorobanServer.getTransaction(sent.hash);
   }
 
-  if (status.status !== SorobanRpc.Api.GetTransactionStatus.SUCCESS) {
+  if (status.status !== rpc.Api.GetTransactionStatus.SUCCESS) {
     throw new Error(`Soroban transaction failed: ${sent.hash}`);
   }
 
