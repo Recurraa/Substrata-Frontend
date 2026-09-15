@@ -15,16 +15,32 @@ export function LoadingSpinner({ text = "Loading…" }: { text?: string }) {
   );
 }
 
+/** Alias used by pay/plans pages (`label` preferred over `text`). */
+export function LoadingState({
+  label,
+  text,
+}: {
+  label?: string;
+  text?: string;
+}) {
+  return <LoadingSpinner text={label ?? text ?? "Loading…"} />;
+}
+
 export function ErrorState({
+  title,
   message = "Something went wrong.",
   onRetry,
 }: {
+  title?: string;
   message?: string;
   onRetry?: () => void;
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center text-muted-foreground sm:py-20">
       <AlertCircle className="h-8 w-8 text-destructive" />
+      {title && (
+        <p className="font-display text-base font-semibold text-foreground">{title}</p>
+      )}
       <p className="max-w-sm text-sm">{message}</p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
