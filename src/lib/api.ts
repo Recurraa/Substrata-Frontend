@@ -205,6 +205,25 @@ export async function createPlan(merchantId: string, input: CreatePlanInput): Pr
   return plan;
 }
 
+/** Persist on-chain plan id after Freighter create_plan. */
+export async function syncPlanContract(
+  planId: string,
+  contractPlanId: number,
+  tokenContractId?: string
+): Promise<Plan> {
+  if (!USE_MOCK) {
+    const row = await apiFetch<ApiPlan>(`/plans/${encodeURIComponent(planId)}/contract`, {
+      method: "PATCH",
+      body: JSON.stringify({ contractPlanId, tokenContractId }),
+    });
+    return mapApiPlan(row);
+  }
+  await delay();
+  const plan = MOCK_PLANS.find((p) => p.id === planId);
+  if (!plan) throw new Error(`Plan ${planId} not found`);
+  return plan;
+}
+
 export async function togglePlan(planId: string, isActive: boolean): Promise<Plan> {
   if (!USE_MOCK) {
     if (!isActive) {
