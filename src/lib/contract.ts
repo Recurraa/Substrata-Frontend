@@ -10,6 +10,7 @@ import {
   nativeToScVal,
   BASE_FEE,
   SorobanRpc,
+  scValToNative,
   xdr,
 } from "@stellar/stellar-sdk";
 import { signTransaction } from "@stellar/freighter-api";
@@ -46,7 +47,7 @@ export async function prepareSignAndSend(
   publicKey: string,
   contractId: string,
   buildOp: (contract: Contract) => xdr.Operation
-): Promise<{ hash: string; signedXdr: string }> {
+): Promise<{ hash: string; signedXdr: string; result: unknown }> {
   if (!contractId) {
     throw new Error("Soroban contract ID is not configured.");
   }
@@ -86,7 +87,24 @@ export async function prepareSignAndSend(
     TransactionBuilder.fromXDR(signedXdr, NETWORK_PASSPHRASE)
   );
 
-  return { hash: sent.hash, signedXdr };
+  let status = await sorobanServer.getTransaction(sent.hash);
+  const started = Date.now();
+  while (status.status === SorobanRpc.Api.GetTransactionStatus.NOT_FOUND) {
+    if (Date.now() - started > 60_000) {
+      throw new Error(`Timed out waiting for tx ${sent.hash}`);
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+    status = await sorobanServer.getTransaction(sent.hash);
+  }
+
+  if (status.status !== SorobanRpc.Api.GetTransactionStatus.SUCCESS) {
+    throw new Error(`Soroban transaction failed: ${sent.hash}`);
+  }
+
+  const result =
+    status.returnValue !== undefined ? scValToNative(status.returnValue) : null;
+
+  return { hash: sent.hash, signedXdr, result };
 }
 
 export function requireSubscriptionContractId(): string {
@@ -109,9 +127,9 @@ export async function invokeCreatePlan(
   merchantPublicKey: string,
   input: CreatePlanInput,
   tokenContractId = requireTokenContractId()
-): Promise<{ hash: string }> {
+): Promise<{ hash: string; contractPlanId: number }> {
   const contractId = requireSubscriptionContractId();
-  const { hash } = await prepareSignAndSend(merchantPublicKey, contractId, (contract) =>
+  const { hash, result } = await prepareSignAndSend(merchantPublicKey, contractId, (contract) =>
     contract.call(
       "create_plan",
       Address.fromString(merchantPublicKey).toScVal(),
@@ -122,7 +140,13 @@ export async function invokeCreatePlan(
       Address.fromString(tokenContractId).toScVal()
     )
   );
-  return { hash };
+
+  const contractPlanId = Number(result);
+  if (!Number.isFinite(contractPlanId) || contractPlanId < 0) {
+    throw new Error("create_plan did not return a valid on-chain plan id");
+  }
+
+  return { hash, contractPlanId };
 }
 
 /**
