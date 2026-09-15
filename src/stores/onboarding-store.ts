@@ -24,6 +24,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
       complete: () => set({ step: "done" }),
       reset: () => set({ step: "connect", merchantName: "", webhookUrl: "" }),
     }),
-    { name: "substrata-onboarding" }
+    { name: "sorobill-onboarding" }
   )
 );

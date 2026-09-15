@@ -6,7 +6,7 @@ import { RevenueChart } from "@/components/revenue-chart";
 import { BillingTable } from "@/components/billing-table";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useMerchantStats, useRevenueData, useTransactions } from "@/hooks/use-substrata";
+import { useMerchantStats, useRevenueData, useTransactions } from "@/hooks/use-sorobill";
 import { formatAmount } from "@/lib/utils";
 
 const MERCHANT_ID = "merchant_1";

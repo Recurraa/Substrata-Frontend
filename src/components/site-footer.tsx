@@ -5,7 +5,7 @@ export function SiteFooter() {
     <footer className="border-t border-white/10 bg-slate-950/80 px-6 py-8 text-sm text-teal-100/60">
       <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p>
-          <span className="font-display font-semibold text-teal-50">Substrata</span>
+          <span className="font-display font-semibold text-teal-50">Sorobill</span>
           {" — "}Stripe for recurring global payments on Stellar.
         </p>
         <nav className="flex gap-4">
@@ -16,7 +16,7 @@ export function SiteFooter() {
             Subscriptions
           </Link>
           <a
-            href="https://github.com/Recurraa/Substrata-Frontend"
+            href="https://github.com/Sorobill/Sorobill-App"
             className="hover:text-white"
             target="_blank"
             rel="noreferrer"

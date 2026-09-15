@@ -1,4 +1,4 @@
-# Contributing to Substrata
+# Contributing to Sorobill
 
 Thank you for your interest in contributing! This document covers everything you need to get started.
 
@@ -36,8 +36,8 @@ Be respectful. We follow the [Contributor Covenant](https://www.contributor-cove
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/<your-username>/substrata-frontend.git
-cd substrata-frontend
+git clone https://github.com/<your-username>/sorobill-app.git
+cd Sorobill-App
 
 npm install
 cp .env.example .env.local
@@ -151,7 +151,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full breakdown. Key rules:
 - **Pages** live in `src/app/` — keep them thin, delegate to components and hooks.
 - **Reusable components** live in `src/components/`.
 - **shadcn/ui primitives** live in `src/components/ui/` — don't modify these unless necessary.
-- **Data fetching** goes through `src/lib/api.ts` and `src/hooks/use-substrata.ts`.
+- **Data fetching** goes through `src/lib/api.ts` and `src/hooks/use-sorobill.ts`.
 - **No direct `process.env` access** outside `src/lib/env.ts`.
 
 ---
@@ -168,12 +168,12 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full breakdown. Key rules:
 
 1. Create `src/components/<name>.tsx`.
 2. Export it as a named export.
-3. If it needs server data, create a corresponding hook in `src/hooks/use-substrata.ts`.
+3. If it needs server data, create a corresponding hook in `src/hooks/use-sorobill.ts`.
 
 ### New API endpoint / contract call
 
 1. Add the function to `src/lib/api.ts` with a mock implementation.
-2. Add a React Query hook in `src/hooks/use-substrata.ts`.
+2. Add a React Query hook in `src/hooks/use-sorobill.ts`.
 3. Document the production contract call pattern in a comment.
 
 ### New type
@@ -184,7 +184,7 @@ Add it to `src/types/index.ts` with a JSDoc comment explaining its purpose.
 
 ## Reporting Bugs
 
-Open a [GitHub Issue](https://github.com/your-org/substrata-frontend/issues/new?template=bug_report.md) with:
+Open a [GitHub Issue](https://github.com/Sorobill/Sorobill-App/issues/new?template=bug_report.md) with:
 
 - A clear title
 - Steps to reproduce

@@ -2,7 +2,7 @@
 
 import { StatusBadge } from "@/components/status-badge";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
-import { useSubscriptions } from "@/hooks/use-substrata";
+import { useSubscriptions } from "@/hooks/use-sorobill";
 import { formatDate, formatRelativeTime, shortenAddress } from "@/lib/utils";
 
 const MERCHANT_ADDRESS = "GMERCHANT...ADDR";

@@ -20,4 +20,4 @@ Include:
 
 - Production deployments must set `NEXT_PUBLIC_USE_MOCK=false`
 - Never commit Freighter secrets or treasury keys
-- Verify contract IDs against [DEPLOYMENTS.md](https://github.com/Recurraa/Substrata-Contract/blob/main/DEPLOYMENTS.md)
+- Verify contract IDs against [DEPLOYMENTS.md](https://github.com/Sorobill/Sorobill-Contract/blob/main/DEPLOYMENTS.md)

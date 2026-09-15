@@ -12,7 +12,7 @@ export default function Home() {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-8 sm:px-8">
         <header className="flex items-center justify-between animate-fade-up">
           <Link href="/" className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            Substrata
+            Sorobill
           </Link>
           <Link
             href="/dashboard"
@@ -29,7 +29,7 @@ export default function Home() {
               aria-hidden
             />
             <p className="font-display text-5xl font-bold tracking-tight sm:text-7xl md:text-8xl">
-              Substrata
+              Sorobill
             </p>
           </div>
 

@@ -10,4 +10,4 @@
 - GitHub Actions CI
 
 ### Changed
-- Metadata and package description use Substrata tagline
+- Metadata and package description use Sorobill tagline

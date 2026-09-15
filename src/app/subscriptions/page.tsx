@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/status-badge";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
-import { useSubscriptions, useCancelSubscription } from "@/hooks/use-substrata";
+import { useSubscriptions, useCancelSubscription } from "@/hooks/use-sorobill";
 import { useWalletStore } from "@/stores/wallet-store";
 import { notify } from "@/stores/notification-store";
 import { formatAmount, formatDate, formatRelativeTime } from "@/lib/utils";
@@ -42,7 +42,7 @@ export default function SubscriptionsPage() {
           Connect your wallet to view subscriptions
         </h2>
         <p className="max-w-md text-sm text-muted-foreground">
-          Substrata uses Freighter so you stay in control of every recurring payment.
+          Sorobill uses Freighter so you stay in control of every recurring payment.
         </p>
         <WalletButton />
       </div>

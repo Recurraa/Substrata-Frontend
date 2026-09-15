@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BillingTable } from "@/components/billing-table";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
-import { useSubscriptions, useTransactions } from "@/hooks/use-substrata";
+import { useSubscriptions, useTransactions } from "@/hooks/use-sorobill";
 import { formatAmount, formatDate, formatRelativeTime } from "@/lib/utils";
 import { StatusBadge } from "@/components/status-badge";
 import { useWalletStore } from "@/stores/wallet-store";

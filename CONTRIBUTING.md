@@ -1,4 +1,4 @@
-# Contributing to Substrata Frontend
+# Contributing to Sorobill Frontend
 
 Please read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for the full guide.
 

@@ -16,6 +16,6 @@ export const useWalletStore = create<WalletStore>()(
       setWallet: (wallet) => set(wallet),
       clearWallet: () => set({ address: null, isConnected: false, network: null }),
     }),
-    { name: "substrata-wallet" }
+    { name: "sorobill-wallet" }
   )
 );

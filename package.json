@@ -1,5 +1,5 @@
 {
-  "name": "substrata-frontend",
+  "name": "sorobill-app",
   "version": "0.1.0",
   "description": "Stripe for recurring global payments — powered by Stellar Soroban",
   "private": true,

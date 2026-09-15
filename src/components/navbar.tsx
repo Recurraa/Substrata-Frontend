@@ -32,7 +32,7 @@ export function Navbar() {
             ⬡
           </span>
           <span className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-            Substrata
+            Sorobill
           </span>
         </Link>
 

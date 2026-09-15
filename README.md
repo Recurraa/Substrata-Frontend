@@ -1,8 +1,8 @@
-# ⬡ Substrata
+# ⬡ Sorobill
 
 > **Stripe for recurring global payments — powered by Stellar Soroban.**
 
-Substrata is an open-source, production-ready frontend for a cross-border subscription billing platform. It lets merchants create on-chain subscription plans and collect recurring payments in USDC, EURC, XLM, or any Stellar asset — without banks, borders, or intermediaries.
+Sorobill is an open-source, production-ready frontend for a cross-border subscription billing platform. It lets merchants create on-chain subscription plans and collect recurring payments in USDC, EURC, XLM, or any Stellar asset — without banks, borders, or intermediaries.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org)
@@ -28,7 +28,7 @@ Substrata is an open-source, production-ready frontend for a cross-border subscr
 
 ## Overview
 
-Substrata provides two interfaces in one app:
+Sorobill provides two interfaces in one app:
 
 | Role | What they do |
 |------|-------------|
@@ -87,8 +87,8 @@ All billing logic is executed on **Stellar Soroban** smart contracts. The fronte
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-org/substrata-frontend.git
-cd substrata-frontend
+git clone https://github.com/Sorobill/Sorobill-App.git
+cd Sorobill-App
 
 # Install dependencies
 npm install
@@ -100,7 +100,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — you'll be redirected to the dashboard.
+Open [http://localhost:3000](http://localhost:3000) — you.ll land on the Sorobill home page.
 
 ### First-time merchant setup
 
@@ -163,7 +163,7 @@ src/
 │   └── states.tsx          # Loading / error / empty states
 ├── hooks/
 │   ├── use-freighter.ts    # Freighter wallet integration
-│   └── use-substrata.ts    # React Query data hooks
+│   └── use-sorobill.ts    # React Query data hooks
 ├── stores/
 │   ├── wallet-store.ts     # Zustand wallet state
 │   ├── notification-store.ts
@@ -210,9 +210,9 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for a deeper dive into design decisi
 
 | Repo | Role |
 |------|------|
-| [Substrata-Contract](https://github.com/Recurraa/Substrata-Contract) | Soroban subscription protocol |
-| [Substrata-Backend](https://github.com/Recurraa/Substrata-Backend) | Billing API, scheduler, webhooks |
-| [Substrata-Frontend](https://github.com/Recurraa/Substrata-Frontend) | Merchant + subscriber UI (this repo) |
+| [Sorobill-Contract](https://github.com/Sorobill/Sorobill-Contract) | Soroban subscription protocol |
+| [Sorobill-Backend](https://github.com/Sorobill/Sorobill-Backend) | Billing API, scheduler, webhooks |
+| [Sorobill-App](https://github.com/Sorobill/Sorobill-App) | Merchant + subscriber UI (this repo) |
 
 ---
 
@@ -226,4 +226,4 @@ Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) before opening a PR.
 
 ## License
 
-[MIT](LICENSE) © Substrata Contributors
+[MIT](LICENSE) © Sorobill Contributors

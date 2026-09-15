@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "@/components/revenue-chart";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
-import { useRevenueData, useMerchantStats } from "@/hooks/use-substrata";
+import { useRevenueData, useMerchantStats } from "@/hooks/use-sorobill";
 import { formatAmount } from "@/lib/utils";
 
 const MERCHANT_ID = "merchant_1";

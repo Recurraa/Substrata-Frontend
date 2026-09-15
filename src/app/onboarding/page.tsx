@@ -63,7 +63,7 @@ export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-12">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-primary">⬡ Substrata</h1>
+        <h1 className="text-4xl font-bold text-primary">⬡ Sorobill</h1>
         <p className="mt-2 text-muted-foreground">Set up your merchant account in minutes</p>
       </div>
 
@@ -122,7 +122,7 @@ export default function OnboardingPage() {
                     name="webhook"
                     type="url"
                     defaultValue={webhookUrl}
-                    placeholder="https://yourapp.com/webhooks/substrata"
+                    placeholder="https://yourapp.com/webhooks/sorobill"
                   />
                 </div>
                 <Button type="submit" className="w-full">Continue</Button>

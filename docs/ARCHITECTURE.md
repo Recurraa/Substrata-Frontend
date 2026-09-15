@@ -1,12 +1,12 @@
 # Architecture
 
-This document describes the technical design of the Substrata frontend.
+This document describes the technical design of the Sorobill frontend.
 
 ---
 
 ## Overview
 
-Substrata is a **pure frontend** application. It does not run a backend server. All state is either:
+Sorobill is a **pure frontend** application. It does not run a backend server. All state is either:
 
 1. Read from Stellar Soroban smart contracts via the Soroban RPC
 2. Submitted as signed transactions through the user's Freighter wallet
@@ -67,7 +67,7 @@ src/
 
 ```
 Page component
-  → useQuery hook (use-substrata.ts)
+  → useQuery hook (use-sorobill.ts)
     → API function (api.ts)
       → Mock data (dev) OR Soroban RPC call (prod)
         → Returns typed data

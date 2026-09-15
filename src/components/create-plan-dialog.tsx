@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useCreatePlan } from "@/hooks/use-substrata";
+import { useCreatePlan } from "@/hooks/use-sorobill";
 import { notify } from "@/stores/notification-store";
 import type { BillingInterval, SupportedAsset } from "@/types";
 

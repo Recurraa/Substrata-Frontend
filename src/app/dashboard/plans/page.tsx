@@ -3,7 +3,7 @@
 import { PlanCard } from "@/components/plan-card";
 import { CreatePlanDialog } from "@/components/create-plan-dialog";
 import { LoadingSpinner, ErrorState, EmptyState } from "@/components/states";
-import { usePlans } from "@/hooks/use-substrata";
+import { usePlans } from "@/hooks/use-sorobill";
 
 const MERCHANT_ID = "merchant_1";
 

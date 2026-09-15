@@ -39,7 +39,7 @@ const EVENT_PAYLOADS: Record<WebhookEventType, Record<string, unknown>> = {
 export default function WebhooksPage() {
   const [events, setEvents] = useState<WebhookEvent[]>(MOCK_WEBHOOK_EVENTS);
   const [selectedType, setSelectedType] = useState<WebhookEventType>("payment.success");
-  const [webhookUrl, setWebhookUrl] = useState("https://yourapp.com/webhooks/substrata");
+  const [webhookUrl, setWebhookUrl] = useState("https://yourapp.com/webhooks/sorobill");
   const [isFiring, setIsFiring] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<WebhookEvent | null>(null);
 
@@ -78,7 +78,7 @@ export default function WebhooksPage() {
           <div>
             <h1 className="text-3xl font-bold">Webhook Simulator</h1>
             <p className="mt-1 text-muted-foreground">
-              Test your webhook endpoint by firing simulated Substrata events.
+              Test your webhook endpoint by firing simulated Sorobill events.
             </p>
           </div>
 
