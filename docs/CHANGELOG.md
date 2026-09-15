@@ -1,13 +1,9 @@
 # Changelog
 
-## [0.2.0] - 2026-09-14
+## [0.3.0] — 2026-09-15
 
 ### Added
-- Brand-first landing page
-- REST API client with mock fallback
-- Freighter wallet integration via official API
-- Soroban helpers for create_plan, subscribe, approve
-- GitHub Actions CI
-
-### Changed
-- Metadata and package description use Sorobill tagline
+- Public `/plans` and `/pay/[planId]` checkout surfaces
+- `PayHero`, plan mapper, CSV helpers
+- `LoadingState` alias and `ErrorState` title prop
+- Demo script for reviewers
